@@ -1,13 +1,15 @@
 #include "CString.h"
+#include <stdio.h>
 
 int main(void) {
-  CString *str = CString_new("this is some string");
+  CString *str1 = CString_new(NULL);
+  CString_concat_cstr(str1, "hello world");
 
-  CString_pushCStr(str, ". hello me");
-  CString_print(str);
+  CString *str2 = CString_new("message number 1. This is new");
+  CString_concat_CString(str1, str2);
 
-  CString_pushCStr(str, "This is something you should know this i");
-  CString_print(str);
-  CString_destroy(str);
+  CString_print(str1);
+  CString_destroy(str1);
+  CString_destroy(str2);
   return 0;
 }
