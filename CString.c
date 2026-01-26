@@ -14,6 +14,14 @@ struct CString {
 };
 
 // START ===== CSTRING HELPERS =============================
+CString_CharOption CString_CharOption_None() {
+  return (CString_CharOption){.tag = CString_Option_None};
+}
+
+CString_CharOption CString_CharOption_Some(char c) {
+  return (CString_CharOption){.tag = CString_Option_Some, .value = c};
+}
+
 CString_AllocResult CString_AllocResult_Ok() {
   return (CString_AllocResult){.tag = CString_Result_Ok};
 }
@@ -147,4 +155,45 @@ CString_ConcatResult CString_concat_CString(CString *dest, const CString *src) {
   memcpy(dest->data + dest->length, src->data, src_len);
   dest->length = new_length;
   return CString_ConcatResult_Ok();
+}
+
+CString_Boolean CString_equals(const CString *str1, const CString *str2) {
+  if (str1 == NULL || str2 == NULL) {
+    return False;
+  }
+
+  size_t str1_len = CString_len(str1);
+  size_t str2_len = CString_len(str2);
+  if (str1_len != str2_len) {
+    return False;
+  }
+
+  for (size_t i = 0; i < str1_len; i++) { // compare the corresponding chars
+    CString_CharOption char_str1_opt = CString_charAt(str1, i);
+    CString_CharOption char_str2_opt = CString_charAt(str2, i);
+    if (char_str1_opt.tag == CString_Option_Some &&
+        char_str2_opt.tag == CString_Option_Some) {
+      if (char_str1_opt.value != char_str2_opt.value) {
+        return False;
+      }
+    } else {
+      return False;
+    }
+  }
+
+  return True;
+}
+
+// get char at a specific index in the string
+CString_CharOption CString_charAt(const CString *str, size_t index) {
+  if (str == NULL) {
+    return CString_CharOption_None();
+  }
+
+  // bounds check
+  if (index >= CString_len(str)) {
+    return CString_CharOption_None();
+  }
+
+  return CString_CharOption_Some(str->data[index]);
 }

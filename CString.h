@@ -5,6 +5,7 @@ typedef struct CString CString;
 typedef enum { False = 0, True = 1 } CString_Boolean;
 
 enum ResultTag { CString_Result_Ok = 1, CString_Result_Err = 0 };
+enum OptionTag { CString_Option_Some = 1, CString_Option_None = 0 };
 
 #define CSTRING_RESULT(T, E)                                                   \
   struct {                                                                     \
@@ -21,6 +22,12 @@ enum ResultTag { CString_Result_Ok = 1, CString_Result_Err = 0 };
     E error;                                                                   \
   }
 
+#define CSTRING_OPTION(T)                                                      \
+  struct {                                                                     \
+    enum OptionTag tag;                                                        \
+    T value;                                                                   \
+  }
+
 #define CSTRING_OK(val) {.tag = CString_Result_Ok, .value = (val)}
 #define CSTRING_ERR(err) {.tag = CString_Result_Err, .error = (err)}
 #define CSTRING_OK_VOID() {.tag = CString_Result_Ok}
@@ -28,12 +35,16 @@ enum ResultTag { CString_Result_Ok = 1, CString_Result_Err = 0 };
 
 typedef CSTRING_RESULT_VOID(int) CString_AllocResult;
 typedef CSTRING_RESULT_VOID(int) CString_ConcatResult;
+typedef CSTRING_OPTION(char) CString_CharOption;
 
 CString_AllocResult CString_AllocResult_Ok();
 CString_AllocResult CString_AllocResult_Err();
 
 CString_ConcatResult CString_ConcatResult_Ok();
 CString_ConcatResult CString_ConcatResult_Err();
+
+CString_CharOption CString_CharOption_None();
+CString_CharOption CString_CharOption_Some(char c);
 
 CString *CString_new(const char *str);
 void CString_destroy(CString *str);
@@ -52,10 +63,14 @@ CString_ConcatResult CString_concat_CString(
     CString *dest,
     const CString *src); // append another CString to end of current CString
 
+// indexing into string
+CString_CharOption CString_charAt(const CString *str, size_t index);
+
 // // comparison
-// CString_Boolean CString_eq(
-//     const CString *a,
-//     const CString *b); // compares two CStrings to see if their content is equal
+CString_Boolean
+CString_equals(const CString *str1,
+               const CString *str2); // compares two CStrings to see if
+                                     // their content is equal
 //
 // CString_Boolean
 // CString_eq_cstr(const CString *a,
