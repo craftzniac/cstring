@@ -14,6 +14,14 @@ struct CString {
 };
 
 // START ===== CSTRING HELPERS =============================
+CString_InsertResult cstring_InsertResult_Err(char *msg) {
+  return (CString_InsertResult){.tag = CString_Result_Err, .error = msg};
+}
+
+CString_InsertResult cstring_InsertResult_Ok() {
+  return (CString_InsertResult){.tag = CString_Result_Ok, .error = NULL};
+}
+
 CString_CharOption CString_CharOption_None() {
   return (CString_CharOption){.tag = CString_Option_None};
 }
@@ -44,11 +52,17 @@ CString_AllocResult CString_resize(
   if (str == NULL || str->data == NULL) {
     return CString_AllocResult_Err();
   }
+
+  if (str->capacity >= min_capacity) {
+    return CString_AllocResult_Ok();
+  }
+
   size_t new_capacity = min_capacity * 2;
   char *temp = realloc(str->data, new_capacity);
   if (temp == NULL) {
     return CString_AllocResult_Err();
   }
+  str->data = temp;
   str->capacity = new_capacity;
   return CString_AllocResult_Ok();
 }
@@ -184,6 +198,51 @@ CString_Boolean CString_equals(const CString *str1, const CString *str2) {
   return True;
 }
 
+/** Insert characters from a string buffer {src} into a cstring starting at
+ * {startIndex}.
+ * {src} is NOT assumed to be nullterminated, and therefore a {count} is used to
+ * decide how many chars are collected from the buffer
+ * */
+CString_InsertResult CString_insert_cstr(CString *dest, const char *src,
+                                         size_t startIndex, size_t count) {
+  if (dest == NULL || dest->data == NULL || src == NULL) {
+    return cstring_InsertResult_Err("encountered a NULL pointer");
+  }
+
+  size_t dest_len = CString_len(dest);
+  if (startIndex >= dest_len) {
+    char buf[93];
+    snprintf(buf, sizeof(buf),
+             "startIndex is out of bounds of string buffer. startIndex was %lu "
+             "but dest string length was %lu",
+             startIndex, dest_len);
+    // FIX: once this function returns, buf becomes a dangling pointer. I have
+    // to fix this without using CString since it is heap-allocated
+    return cstring_InsertResult_Err(buf);
+  }
+
+  size_t min_capacity = count + dest->length;
+  if (min_capacity > dest->capacity) { // resize dest to be able to fit src
+    CString_AllocResult res = CString_resize(dest, min_capacity);
+    if (res.tag == CString_Result_Err) {
+      return cstring_InsertResult_Err("resize failed");
+    }
+  }
+
+  size_t tail_len = dest->length - startIndex;
+
+  // copy the tail elements in dest->data to the end of the buffer.
+  // Do this first before copying the elements from src to
+  // dest->data, so that elements between startIndex and dest->len don't get
+  // overriden
+  memmove(dest->data + startIndex + count, dest->data + startIndex, tail_len);
+
+  // then copy the elements of src into dest->data
+  memmove(dest->data + startIndex, src, count);
+  dest->length = min_capacity;
+  return cstring_InsertResult_Ok();
+}
+
 // get char at a specific index in the string
 CString_CharOption CString_charAt(const CString *str, size_t index) {
   if (str == NULL) {
@@ -196,4 +255,11 @@ CString_CharOption CString_charAt(const CString *str, size_t index) {
   }
 
   return CString_CharOption_Some(str->data[index]);
+}
+
+size_t CString_capacity(const CString *str) {
+  if (str == NULL) {
+    return 0;
+  }
+  return str->capacity;
 }

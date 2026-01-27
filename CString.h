@@ -35,6 +35,7 @@ enum OptionTag { CString_Option_Some = 1, CString_Option_None = 0 };
 
 typedef CSTRING_RESULT_VOID(int) CString_AllocResult;
 typedef CSTRING_RESULT_VOID(int) CString_ConcatResult;
+typedef CSTRING_RESULT_VOID(char *) CString_InsertResult;
 typedef CSTRING_OPTION(char) CString_CharOption;
 
 CString_AllocResult CString_AllocResult_Ok();
@@ -45,6 +46,9 @@ CString_ConcatResult CString_ConcatResult_Err();
 
 CString_CharOption CString_CharOption_None();
 CString_CharOption CString_CharOption_Some(char c);
+
+CString_InsertResult cstring_InsertResult_Err(char *msg);
+CString_InsertResult cstring_InsertResult_Ok();
 
 CString *CString_new(const char *str);
 void CString_destroy(CString *str);
@@ -76,12 +80,12 @@ CString_equals(const CString *str1,
 // CString_eq_cstr(const CString *a,
 //                 const char *b); // compares the contents of a CString and a
 //                                 // regular c string to see if they're equal
-//
+
+size_t CString_capacity(const CString *str);
+
 // // insertion
-// void CString_insert_cstr(
-//     CString *dest, const char *src,
-//     size_t startIndex); // insert a regular c string on the CString
-//                         // starting from some index on the CString
+CString_InsertResult CString_insert_cstr(CString *dest, const char *src,
+                                         size_t startIndex, size_t count);
 // void CString_insert_CString(CString *dest, const CString *src,
 //                             size_t startIndex);
 //
