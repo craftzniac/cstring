@@ -36,6 +36,8 @@ enum OptionTag { CString_Option_Some = 1, CString_Option_None = 0 };
 typedef CSTRING_RESULT_VOID(int) CString_AllocResult;
 typedef CSTRING_RESULT_VOID(int) CString_ConcatResult;
 typedef CSTRING_RESULT_VOID(char *) CString_InsertResult;
+typedef CSTRING_RESULT(CString *, const char *) CString_SubstringResult;
+
 typedef CSTRING_OPTION(char) CString_CharOption;
 
 CString_AllocResult CString_AllocResult_Ok();
@@ -49,6 +51,9 @@ CString_CharOption CString_CharOption_Some(char c);
 
 CString_InsertResult cstring_InsertResult_Err(char *msg);
 CString_InsertResult cstring_InsertResult_Ok();
+
+CString_SubstringResult cstring_SubstringResult_Err(const char *msg);
+CString_SubstringResult cstring_SubstringResult_Ok(CString *str);
 
 CString *CString_new(const char *str);
 void CString_destroy(CString *str);
@@ -75,11 +80,6 @@ CString_Boolean
 CString_equals(const CString *str1,
                const CString *str2); // compares two CStrings to see if
                                      // their content is equal
-//
-// CString_Boolean
-// CString_eq_cstr(const CString *a,
-//                 const char *b); // compares the contents of a CString and a
-//                                 // regular c string to see if they're equal
 
 size_t CString_capacity(const CString *str);
 
@@ -89,16 +89,15 @@ CString_InsertResult CString_insert_cstr(CString *dest, const char *src,
 // void CString_insert_CString(CString *dest, const CString *src,
 //                             size_t startIndex);
 //
-// CString *CString_slice(
-//     const CString *a, size_t startIndex,
-//     size_t count); // creates a substring from the CString from the CString
-//
+
+CString_SubstringResult CString_substring(const CString *str,
+                                          size_t start_index_inclusive,
+                                          size_t end_index_exclusive);
+
 // // finding within cstring
-// CString_Boolean CString_includes_cstr(const CString *haystack,
-//                                       const char *needle);
-// CString_Boolean CString_includes_CString(const CString *haystack,
+// CString_Boolean CString_includes_cstring(const CString *haystack,
 //                                          const CString *needle);
-// CString_Boolean CString_startsWith_CString(const CString *haystack,
+// CString_Boolean CString_startsWith_cstring(const CString *haystack,
 //                                            const char *needle);
 // CString_Boolean CString_startsWith_cstr(const CString *haystack,
 //                                         const char *needle);

@@ -1,28 +1,29 @@
 #include "CString.h"
+#include <assert.h>
 #include <stdio.h>
-#include <string.h>
 
 int main(void) {
-  CString *str1 =
-      CString_new("THE FIRST RANDOM TEXT. THE SECOND RANDOM TEXT. THE THIRD "
-                  "RANDOM TEXT. THE FOURTH RANDOM TEXT. THE FIFTH RANDOM TEXT. "
-                  "THE SIXTH RANDOM TEXT.");
-  char *name = "let all that is in me praise";
+  CString *str = CString_new("God is good");
 
-  printf("cap: %lu\n", CString_capacity(str1));
+  CString_SubstringResult res = CString_substring(str, 0, 6);
 
-  CString_InsertResult res = CString_insert_cstr(str1, name, 17, strlen(name));
   switch (res.tag) {
   case CString_Result_Err:
-    printf("insert err: %s", res.error);
+    printf("%s", res.error);
     break;
-  case CString_Result_Ok:
-    CString_print(str1);
-    break;
-  }
-  printf("cap: %lu\n", CString_capacity(str1));
-  printf("len: %lu\n", CString_len(str1));
+  case CString_Result_Ok: {
+    CString *substring = res.value;
+    printf("substring: ");
+    CString_print(substring);
 
-  CString_destroy(str1);
+    CString *temp = CString_new("God is");
+    assert(CString_equals(substring, temp) == True);
+    CString_destroy(temp);
+
+    CString_destroy(substring);
+  } break;
+  }
+
+  CString_destroy(str);
   return 0;
 }

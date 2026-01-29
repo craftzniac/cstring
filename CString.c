@@ -14,6 +14,14 @@ struct CString {
 };
 
 // START ===== CSTRING HELPERS =============================
+CString_SubstringResult cstring_SubstringResult_Err(const char *msg) {
+  return (CString_SubstringResult){.tag = CString_Result_Err, .error = msg};
+}
+
+CString_SubstringResult cstring_SubstringResult_Ok(CString *str) {
+  return (CString_SubstringResult){.tag = CString_Result_Ok, .value = str};
+}
+
 CString_InsertResult cstring_InsertResult_Err(char *msg) {
   return (CString_InsertResult){.tag = CString_Result_Err, .error = msg};
 }
@@ -262,4 +270,27 @@ size_t CString_capacity(const CString *str) {
     return 0;
   }
   return str->capacity;
+}
+
+CString_SubstringResult CString_substring(const CString *str,
+                                          size_t start_index_inclusive,
+                                          size_t end_index_exclusive) {
+  if (str == NULL || str->data == NULL) {
+    return cstring_SubstringResult_Err("string was NULL");
+  }
+
+  // make sure both start index and endindex are within the bounds of the string
+  // buffer. And end_index has to be greater than or equal to start_index
+  if (start_index_inclusive >= str->length ||
+      end_index_exclusive > str->length ||
+      start_index_inclusive > end_index_exclusive) {
+    return cstring_SubstringResult_Err("invalid index");
+  }
+
+  CString *substring = CString_new(NULL);
+  for (size_t i = start_index_inclusive; i < end_index_exclusive; i++) {
+    CString_concat_char(substring, str->data[i]);
+  }
+
+  return cstring_SubstringResult_Ok(substring);
 }
